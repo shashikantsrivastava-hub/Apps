@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Random Indian Name Generator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #020617;
+      --accent: #22c55e;
+      --accent-soft: rgba(34, 197, 94, 0.1);
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+      background: radial-gradient(circle at top, #1f2937 0, #020617 55%, #000 100%);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 420px;
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.98));
+      border-radius: 18px;
+      padding: 20px 20px 18px;
+      box-shadow:
+        0 24px 60px rgba(0, 0, 0, 0.55),
+        0 0 0 1px rgba(148, 163, 184, 0.1);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      backdrop-filter: blur(16px);
+    }
+
+    .app-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .title-group {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .title span.icon {
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at 30% 0, #22c55e, #15803d);
+      box-shadow:
+        0 0 0 2px rgba(22, 101, 52, 0.7),
+        0 10px 30px rgba(22, 163, 74, 0.7);
+      font-size: 17px;
+    }
+
+    .subtitle {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .pill {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      color: var(--text-muted);
+      background: rgba(15, 23, 42, 0.8);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+
+    .pill-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 0 4px var(--accent-soft);
+    }
+
+    .card {
+      border-radius: 14px;
+      padding: 16px 14px;
+      background: radial-gradient(circle at top left, #0b1120, #020617 55%);
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      box-shadow: inset 0 1px 0 rgba(148, 163, 184, 0.24);
+      margin-bottom: 14px;
+    }
+
+    .label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--text-muted);
+    }
+
+    .count-indicator {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .count-indicator span.dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, 0.9);
+    }
+
+    .name-display {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .name {
+      font-size: 1.4rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .meta {
+      text-align: right;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .meta span.tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      margin-left: 4px;
+    }
+
+    .meta span.tag-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, 0.9);
+    }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .btn-primary {
+      flex: 1;
+      border: none;
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      cursor: pointer;
+      color: #ecfdf5;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      box-shadow:
+        0 12px 30px rgba(34, 197, 94, 0.6),
+        0 0 0 1px rgba(21, 128, 61, 0.8);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition:
+        transform 0.08s ease-out,
+        box-shadow 0.08s ease-out,
+        filter 0.08s ease-out;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.05);
+      box-shadow:
+        0 16px 40px rgba(34, 197, 94, 0.8),
+        0 0 0 1px rgba(21, 128, 61, 0.9);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+      box-shadow:
+        0 6px 22px rgba(22, 163, 74, 0.9),
+        0 0 0 1px rgba(22, 101, 52, 1);
+    }
+
+    .btn-primary span.icon {
+      font-size: 1.05rem;
+    }
+
+    .select {
+      width: 120px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      background: rgba(15, 23, 42, 0.95);
+      color: var(--text-main);
+      font-size: 0.78rem;
+      padding: 7px 30px 7px 10px;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      position: relative;
+      outline: none;
+      background-image:
+        linear-gradient(45deg, transparent 50%, rgba(148, 163, 184, 0.9) 50%),
+        linear-gradient(135deg, rgba(148, 163, 184, 0.9) 50%, transparent 50%);
+      background-position:
+        calc(100% - 14px) 10px,
+        calc(100% - 10px) 10px;
+      background-size: 5px 5px, 5px 5px;
+      background-repeat: no-repeat;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+      opacity: 0.95;
+    }
+
+    .footer span {
+      white-space: nowrap;
+    }
+
+    .footer a {
+      color: #a5b4fc;
+      text-decoration: none;
+      border-bottom: 1px dashed rgba(129, 140, 248, 0.7);
+    }
+
+    .footer a:hover {
+      color: #c7d2fe;
+      border-bottom-style: solid;
+    }
+
+    @media (max-width: 480px) {
+      .app {
+        padding: 16px 14px 14px;
+      }
+      .title {
+        font-size: 1rem;
+      }
+      .name {
+        font-size: 1.25rem;
+      }
+      .select {
+        width: 110px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="app-header">
+      <div class="title-group">
+        <div class="title">
+          <span class="icon">🇮🇳</span>
+          <span>Indian Name Generator</span>
+        </div>
+        <div class="subtitle">
+          Click once, get a fresh Indian name instantly.
+        </div>
+      </div>
+      <div class="pill">
+        <span class="pill-dot"></span>
+        LIVE
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label-row">
+        <div class="label">Current name</div>
+        <div class="count-indicator">
+          <span class="dot"></span>
+          <span id="generatedCount">0</span> generated
+        </div>
+      </div>
+      <div class="name-display">
+        <div class="name" id="nameDisplay">Click “Get Random Indian Name”</div>
+        <div class="meta">
+          <div>
+            Gender
+            <span class="tag">
+              <span class="tag-dot"></span>
+              <span id="genderDisplay">Any</span>
+            </span>
+          </div>
+          <div style="margin-top: 4px;">
+            Region
+            <span class="tag">
+              <span class="tag-dot"></span>
+              <span id="regionDisplay">All‑India</span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button id="generateBtn" class="btn-primary">
+        <span class="icon">🎲</span>
+        <span>Get Random Indian Name</span>
+      </button>
+      <select id="genderSelect" class="select" title="Filter by gender">
+        <option value="any">Any</option>
+        <option value="female">Female</option>
+        <option value="male">Male</option>
+      </select>
+    </div>
+
+    <div class="footer">
+      <span>Offline, no data sent.</span>
+      <span>Names are sample data.</span>
+    </div>
+  </div>
+
+  <script>
+    // Simple in‑memory dataset of Indian names (first + last).
+    // You can extend this list anytime.
+    const INDIAN_NAMES = [
+      // Female
+      { name: "Saanvi Sharma", gender: "female", region: "North" },
+      { name: "Ananya Verma", gender: "female", region: "North" },
+      { name: "Aadhya Reddy", gender: "female", region: "South" },
+      { name: "Diya Nair", gender: "female", region: "South" },
+      { name: "Myra Mukherjee", gender: "female", region: "East" },
+      { name: "Sara Bose", gender: "female", region: "East" },
+      { name: "Iraa Desai", gender: "female", region: "West" },
+      { name: "Ahana Patel", gender: "female", region: "West" },
+      { name: "Navya Kulkarni", gender: "female", region: "West" },
+      { name: "Garima Singh", gender: "female", region: "North" },
+
+      // Male
+      { name: "Aarav Sharma", gender: "male", region: "North" },
+      { name: "Vivaan Gupta", gender: "male", region: "North" },
+      { name: "Aditya Mehta", gender: "male", region: "West" },
+      { name: "Vihaan Reddy", gender: "male", region: "South" },
+      { name: "Krishna Iyer", gender: "male", region: "South" },
+      { name: "Rohan Das", gender: "male", region: "East" },
+      { name: "Arjun Banerjee", gender: "male", region: "East" },
+      { name: "Karan Joshi", gender: "male", region: "West" },
+      { name: "Rahul Yadav", gender: "male", region: "North" },
+      { name: "Sanjay Rao", gender: "male", region: "South" }
+    ];
+
+    const nameDisplay = document.getElementById("nameDisplay");
+    const genderDisplay = document.getElementById("genderDisplay");
+    const regionDisplay = document.getElementById("regionDisplay");
+    const generatedCountEl = document.getElementById("generatedCount");
+    const generateBtn = document.getElementById("generateBtn");
+    const genderSelect = document.getElementById("genderSelect");
+
+    let generatedCount = 0;
+
+    function getRandomName(filterGender = "any") {
+      let pool = INDIAN_NAMES;
+      if (filterGender === "male" || filterGender === "female") {
+        pool = INDIAN_NAMES.filter(n => n.gender === filterGender);
+      }
+      if (pool.length === 0) {
+        return null;
+      }
+      const index = Math.floor(Math.random() * pool.length);
+      return pool[index];
+    }
+
+    function animateClick(element) {
+      element.style.transform = "translateY(-1px)";
+      setTimeout(() => {
+        element.style.transform = "";
+      }, 90);
+    }
+
+    function generateName() {
+      const genderFilter = genderSelect.value;
+      const result = getRandomName(genderFilter);
+
+      if (!result) {
+        nameDisplay.textContent = "No names available for this filter.";
+        genderDisplay.textContent = "N/A";
+        regionDisplay.textContent = "N/A";
+        return;
+      }
+
+      nameDisplay.textContent = result.name;
+      genderDisplay.textContent =
+        result.gender === "male"
+          ? "Male"
+          : result.gender === "female"
+          ? "Female"
+          : "Any";
+      regionDisplay.textContent = result.region || "All‑India";
+
+      generatedCount += 1;
+      generatedCountEl.textContent = generatedCount.toString();
+    }
+
+    generateBtn.addEventListener("click", () => {
+      animateClick(generateBtn);
+      generateName();
+    });
+
+    // Optional: press Enter to generate a name
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        generateName();
+      }
+    });
+  </script>
+</body>
+</html>
