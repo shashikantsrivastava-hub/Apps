@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Synthetic Data Generator</title>
+    <style>
+        :root {
+            --color-background: #fcfcf9;
+            --color-surface: #fffffd;
+            --color-text: #13343b;
+            --color-text-secondary: #626c71;
+            --color-primary: #21808d;
+            --color-primary-hover: #1d7480;
+            --color-secondary: rgba(94, 82, 64, 0.12);
+            --color-border: rgba(94, 82, 64, 0.2);
+            --color-error: #c0152f;
+            --color-success: #21808d;
+            --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --color-background: #1f2121;
+                --color-surface: #262828;
+                --color-text: #f5f5f5;
+                --color-text-secondary: rgba(167, 169, 169, 0.7);
+                --color-primary: #32b8c6;
+                --color-primary-hover: #2da6b2;
+                --color-secondary: rgba(119, 124, 124, 0.15);
+                --color-border: rgba(119, 124, 124, 0.3);
+                --color-error: #ff5459;
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background: var(--color-background);
+            color: var(--color-text);
+            padding: 2rem;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--color-text);
+        }
+
+        .header p {
+            color: var(--color-text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--color-text);
+            font-size: 0.95rem;
+        }
+
+        .label-info {
+            font-weight: 400;
+            color: var(--color-text-secondary);
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="date"],
+        select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            font-size: 1rem;
+            background: var(--color-surface);
+            color: var(--color-text);
+            transition: border-color 0.2s;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--color-primary);
+        }
+
+        .error-message {
+            color: var(--color-error);
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .btn {
+            padding: 0.875rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--color-primary);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background: var(--color-primary-hover);
+        }
+
+        .btn-secondary {
+            background: var(--color-secondary);
+            color: var(--color-text);
+            margin-right: 1rem;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(94, 82, 64, 0.2);
+        }
+
+        .column-config {
+            background: var(--color-background);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--color-border);
+        }
+
+        .column-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .column-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--color-primary);
+        }
+
+        .conditional-fields {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--color-border);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+
+        .info-box {
+            background: rgba(33, 128, 141, 0.1);
+            border-left: 4px solid var(--color-primary);
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-box p {
+            color: var(--color-text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .preview-section {
+            margin-top: 2rem;
+        }
+
+        .preview-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            overflow-x: auto;
+            display: block;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .preview-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .preview-table th,
+        .preview-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border: 1px solid var(--color-border);
+        }
+
+        .preview-table th {
+            background: var(--color-primary);
+            color: white;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        .preview-table tr:nth-child(even) {
+            background: var(--color-background);
+        }
+
+        .progress-indicator {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .progress-steps {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .progress-step {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .step-circle {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--color-secondary);
+            color: var(--color-text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .step-circle.active {
+            background: var(--color-primary);
+            color: white;
+        }
+
+        .step-arrow {
+            color: var(--color-text-secondary);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .card {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔬 Synthetic Data Generator</h1>
+            <p>Create custom datasets with configurable columns and data types</p>
+        </div>
+
+        <div class="progress-indicator" id="progressIndicator">
+            <div class="progress-steps">
+                <div class="progress-step">
+                    <div class="step-circle active" id="step1Circle">1</div>
+                    <span>Dataset Setup</span>
+                </div>
+                <div class="step-arrow">→</div>
+                <div class="progress-step">
+                    <div class="step-circle" id="step2Circle">2</div>
+                    <span>Column Config</span>
+                </div>
+                <div class="step-arrow">→</div>
+                <div class="progress-step">
+                    <div class="step-circle" id="step3Circle">3</div>
+                    <span>Generate</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page 1: Dataset Configuration -->
+        <div id="page1" class="card">
+            <h2 style="margin-bottom: 1.5rem;">Dataset Configuration</h2>
+            
+            <div class="info-box">
+                <p><strong>Note:</strong> A serial number column (ID) will be automatically added as the first column.</p>
+            </div>
+
+            <form id="datasetForm">
+                <div class="form-group">
+                    <label for="numRows">
+                        Number of Rows
+                        <div class="label-info">How many data records do you want to generate?</div>
+                    </label>
+                    <input type="number" id="numRows" min="1" max="100000" value="100" required>
+                    <div class="error-message" id="rowsError">Please enter a valid number of rows (1-100000)</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="numCols">
+                        Number of Columns (excluding ID)
+                        <div class="label-info">How many additional columns do you need?</div>
+                    </label>
+                    <input type="number" id="numCols" min="1" max="50" value="5" required>
+                    <div class="error-message" id="colsError">Please enter a valid number of columns (1-50)</div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Next: Configure Columns →</button>
+            </form>
+        </div>
+
+        <!-- Page 2: Column Configuration -->
+        <div id="page2" class="card hidden">
+            <h2 style="margin-bottom: 1.5rem;">Column Configuration</h2>
+            
+            <div class="info-box">
+                <p><strong>Column 1 (ID):</strong> Serial number - automatically generated from 1 to N</p>
+            </div>
+
+            <div id="columnConfigs"></div>
+
+            <div class="button-group">
+                <button type="button" class="btn btn-secondary" id="backBtn">← Back</button>
+                <button type="button" class="btn btn-primary" id="generateBtn">Generate Data</button>
+            </div>
+        </div>
+
+        <!-- Page 3: Data Preview and Download -->
+        <div id="page3" class="card hidden">
+            <h2 style="margin-bottom: 1.5rem;">Generated Dataset</h2>
+            
+            <div class="preview-section">
+                <p style="color: var(--color-text-secondary); margin-bottom: 1rem;">
+                    Preview (showing first 100 rows):
+                </p>
+                <div class="preview-table" id="previewTable"></div>
+            </div>
+
+            <div class="button-group">
+                <button type="button" class="btn btn-secondary" id="backBtn2">← Back to Edit</button>
+                <button type="button" class="btn btn-primary" id="downloadBtn">Download CSV</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ===== Indian Names logic taken from Indian Names.html ===== */
+        const INDIAN_NAMES = [
+            { name: "Saanvi Sharma", gender: "female", region: "North" },
+            { name: "Ananya Verma", gender: "female", region: "North" },
+            { name: "Aadhya Reddy", gender: "female", region: "South" },
+            { name: "Diya Nair", gender: "female", region: "South" },
+            { name: "Myra Mukherjee", gender: "female", region: "East" },
+            { name: "Sara Bose", gender: "female", region: "East" },
+            { name: "Iraa Desai", gender: "female", region: "West" },
+            { name: "Ahana Patel", gender: "female", region: "West" },
+            { name: "Navya Kulkarni", gender: "female", region: "West" },
+            { name: "Garima Singh", gender: "female", region: "North" },
+            { name: "Aarav Sharma", gender: "male", region: "North" },
+            { name: "Vivaan Gupta", gender: "male", region: "North" },
+            { name: "Aditya Mehta", gender: "male", region: "West" },
+            { name: "Vihaan Reddy", gender: "male", region: "South" },
+            { name: "Krishna Iyer", gender: "male", region: "South" },
+            { name: "Rohan Das", gender: "male", region: "East" },
+            { name: "Arjun Banerjee", gender: "male", region: "East" },
+            { name: "Karan Joshi", gender: "male", region: "West" },
+            { name: "Rahul Yadav", gender: "male", region: "North" },
+            { name: "Sanjay Rao", gender: "male", region: "South" }
+        ];
+
+        function getRandomIndianName(filterGender = "any") {
+            let pool = INDIAN_NAMES;
+            if (filterGender === "male" || filterGender === "female") {
+                pool = INDIAN_NAMES.filter(n => n.gender === filterGender);
+            }
+            if (pool.length === 0) {
+                return null;
+            }
+            const index = Math.floor(Math.random() * pool.length);
+            return pool[index];
+        }
+        /* ========================================================== */
+
+        let datasetConfig = {
+            numRows: 0,
+            numCols: 0,
+            columns: []
+        };
+        let generatedData = [];
+
+        // Page navigation
+        function showPage(pageNum) {
+            document.getElementById('page1').classList.add('hidden');
+            document.getElementById('page2').classList.add('hidden');
+            document.getElementById('page3').classList.add('hidden');
+            document.getElementById(`page${pageNum}`).classList.remove('hidden');
+
+            ['step1Circle', 'step2Circle', 'step3Circle'].forEach((id, idx) => {
+                const circle = document.getElementById(id);
+                if (idx < pageNum) {
+                    circle.classList.add('active');
+                } else {
+                    circle.classList.remove('active');
+                }
+            });
+        }
+
+        // Page 1: Dataset configuration submission
+        document.getElementById('datasetForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const numRows = parseInt(document.getElementById('numRows').value);
+            const numCols = parseInt(document.getElementById('numCols').value);
+            
+            let valid = true;
+            
+            if (!numRows || numRows < 1 || numRows > 100000) {
+                document.getElementById('rowsError').classList.add('show');
+                valid = false;
+            } else {
+                document.getElementById('rowsError').classList.remove('show');
+            }
+            
+            if (!numCols || numCols < 1 || numCols > 50) {
+                document.getElementById('colsError').classList.add('show');
+                valid = false;
+            } else {
+                document.getElementById('colsError').classList.remove('show');
+            }
+            
+            if (!valid) return;
+            
+            datasetConfig.numRows = numRows;
+            datasetConfig.numCols = numCols;
+            
+            generateColumnConfigs();
+            showPage(2);
+        });
+
+        // Generate column configuration forms
+        function generateColumnConfigs() {
+            const container = document.getElementById('columnConfigs');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < datasetConfig.numCols; i++) {
+                const colDiv = document.createElement('div');
+                colDiv.className = 'column-config';
+                colDiv.innerHTML = `
+                    <div class="column-header">
+                        <div class="column-title">Column ${i + 2}</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Column Name</label>
+                        <input type="text" class="col-name" data-col="${i}" placeholder="e.g., Age, Name, Date" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Data Type</label>
+                        <select class="col-type" data-col="${i}" required>
+                            <option value="">Select type...</option>
+                            <option value="numeric">Numeric</option>
+                            <option value="text">Text</option>
+                            <option value="date">Date</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Numeric fields -->
+                    <div class="conditional-fields numeric-fields hidden" id="numeric-${i}">
+                        <div class="form-group">
+                            <label>Mean Value</label>
+                            <input type="number" class="col-mean" data-col="${i}" step="any" placeholder="e.g., 100">
+                        </div>
+                        <div class="form-group">
+                            <label>Standard Deviation</label>
+                            <input type="number" class="col-stddev" data-col="${i}" step="any" min="0" placeholder="e.g., 15">
+                        </div>
+                    </div>
+                    
+                    <!-- Date fields -->
+                    <div class="conditional-fields date-fields hidden" id="date-${i}">
+                        <div class="form-group">
+                            <label>Start Date</label>
+                            <input type="date" class="col-start-date" data-col="${i}">
+                        </div>
+                        <div class="form-group">
+                            <label>End Date</label>
+                            <input type="date" class="col-end-date" data-col="${i}">
+                        </div>
+                    </div>
+                    
+                    <!-- Text fields -->
+                    <div class="conditional-fields text-fields hidden" id="text-${i}">
+                        <div class="form-group">
+                            <label>Text Generation Type</label>
+                            <select class="col-text-type" data-col="${i}">
+                                <option value="words">Random Words</option>
+                                <option value="alphanumeric">Alphanumeric String</option>
+                                <option value="letters">Random Letters</option>
+                                <option value="indianName">Indian Name (India app)</option>
+                            </select>
+                        </div>
+                        <div class="form-group indian-gender-group hidden">
+                            <label>Indian Name Gender</label>
+                            <select class="col-indian-gender" data-col="${i}">
+                                <option value="any">Any</option>
+                                <option value="female">Female</option>
+                                <option value="male">Male</option>
+                            </select>
+                        </div>
+                        <div class="form-group text-length-group">
+                            <label>Length (characters or word count)</label>
+                            <input type="number" class="col-text-length" data-col="${i}" min="1" max="100" value="10">
+                        </div>
+                    </div>
+                `;
+                container.appendChild(colDiv);
+            }
+            
+            // Data type change
+            document.querySelectorAll('.col-type').forEach(select => {
+                select.addEventListener('change', (e) => {
+                    const col = e.target.dataset.col;
+                    const type = e.target.value;
+                    
+                    document.getElementById(`numeric-${col}`).classList.add('hidden');
+                    document.getElementById(`date-${col}`).classList.add('hidden');
+                    document.getElementById(`text-${col}`).classList.add('hidden');
+                    
+                    if (type) {
+                        document.getElementById(`${type}-${col}`).classList.remove('hidden');
+                    }
+                });
+            });
+
+            // Text generation type change (to toggle Indian gender vs length)
+            document.querySelectorAll('.col-text-type').forEach(select => {
+                select.addEventListener('change', (e) => {
+                    const col = e.target.dataset.col;
+                    const value = e.target.value;
+                    const parent = e.target.closest('.text-fields');
+                    const genderGroup = parent.querySelector('.indian-gender-group');
+                    const lengthGroup = parent.querySelector('.text-length-group');
+
+                    if (value === 'indianName') {
+                        genderGroup.classList.remove('hidden');
+                        lengthGroup.classList.add('hidden');
+                    } else {
+                        genderGroup.classList.add('hidden');
+                        lengthGroup.classList.remove('hidden');
+                    }
+                });
+            });
+        }
+
+        // Back button handlers
+        document.getElementById('backBtn').addEventListener('click', () => {
+            showPage(1);
+        });
+
+        document.getElementById('backBtn2').addEventListener('click', () => {
+            showPage(2);
+        });
+
+        // Generate data button
+        document.getElementById('generateBtn').addEventListener('click', () => {
+            if (!validateColumnConfigs()) return;
+            
+            collectColumnConfigs();
+            generateData();
+            displayPreview();
+            showPage(3);
+        });
+
+        // Validate column configurations
+        function validateColumnConfigs() {
+            let valid = true;
+            const names = [];
+            
+            document.querySelectorAll('.col-name').forEach(input => {
+                const name = input.value.trim();
+                if (!name) {
+                    alert(`Please enter a name for Column ${parseInt(input.dataset.col) + 2}`);
+                    valid = false;
+                    return;
+                }
+                if (names.includes(name)) {
+                    alert(`Duplicate column name: "${name}". Please use unique names.`);
+                    valid = false;
+                    return;
+                }
+                names.push(name);
+            });
+            
+            if (!valid) return false;
+            
+            document.querySelectorAll('.col-type').forEach(select => {
+                if (!select.value) {
+                    alert(`Please select a data type for Column ${parseInt(select.dataset.col) + 2}`);
+                    valid = false;
+                }
+            });
+            
+            return valid;
+        }
+
+        // Collect column configurations
+        function collectColumnConfigs() {
+            datasetConfig.columns = [];
+            
+            for (let i = 0; i < datasetConfig.numCols; i++) {
+                const name = document.querySelector(`.col-name[data-col="${i}"]`).value.trim();
+                const type = document.querySelector(`.col-type[data-col="${i}"]`).value;
+                
+                const config = { name, type };
+                
+                if (type === 'numeric') {
+                    config.mean = parseFloat(document.querySelector(`.col-mean[data-col="${i}"]`).value) || 0;
+                    config.stddev = parseFloat(document.querySelector(`.col-stddev[data-col="${i}"]`).value) || 1;
+                } else if (type === 'date') {
+                    config.startDate = document.querySelector(`.col-start-date[data-col="${i}"]`).value || '2020-01-01';
+                    config.endDate = document.querySelector(`.col-end-date[data-col="${i}"]`).value || '2026-12-31';
+                } else if (type === 'text') {
+                    const textType = document.querySelector(`.col-text-type[data-col="${i}"]`).value;
+                    config.textType = textType;
+                    if (textType === 'indianName') {
+                        config.indianGender = document.querySelector(`.col-indian-gender[data-col="${i}"]`).value || 'any';
+                    } else {
+                        config.textLength = parseInt(document.querySelector(`.col-text-length[data-col="${i}"]`).value) || 10;
+                    }
+                }
+                
+                datasetConfig.columns.push(config);
+            }
+        }
+
+        // Generate synthetic data
+        function generateData() {
+            generatedData = [];
+            
+            for (let row = 0; row < datasetConfig.numRows; row++) {
+                const rowData = { ID: row + 1 };
+                
+                datasetConfig.columns.forEach(col => {
+                    if (col.type === 'numeric') {
+                        rowData[col.name] = generateNumeric(col.mean, col.stddev);
+                    } else if (col.type === 'date') {
+                        rowData[col.name] = generateDate(col.startDate, col.endDate);
+                    } else if (col.type === 'text') {
+                        if (col.textType === 'indianName') {
+                            const result = getRandomIndianName(col.indianGender || 'any');
+                            rowData[col.name] = result ? result.name : '';
+                        } else {
+                            rowData[col.name] = generateText(col.textType, col.textLength);
+                        }
+                    }
+                });
+                
+                generatedData.push(rowData);
+            }
+        }
+
+        // Generate numeric value (normal distribution)
+        function generateNumeric(mean, stddev) {
+            const u1 = Math.random();
+            const u2 = Math.random();
+            const z0 = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+            return (mean + z0 * stddev).toFixed(2);
+        }
+
+        // Generate random date
+        function generateDate(startDate, endDate) {
+            const start = new Date(startDate).getTime();
+            const end = new Date(endDate).getTime();
+            const randomTime = start + Math.random() * (end - start);
+            return new Date(randomTime).toISOString().split('T')[0];
+        }
+
+        // Generate text
+        function generateText(textType, length) {
+            if (textType === 'words') {
+                const words = ['Lorem', 'ipsum', 'dolor', 'sit', 'amet', 'consectetur', 'adipiscing', 'elit', 'sed', 'do', 'eiusmod', 'tempor', 'incididunt', 'ut', 'labore', 'et', 'dolore', 'magna', 'aliqua'];
+                const result = [];
+                for (let i = 0; i < length; i++) {
+                    result.push(words[Math.floor(Math.random() * words.length)]);
+                }
+                return result.join(' ');
+            } else if (textType === 'alphanumeric') {
+                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                let result = '';
+                for (let i = 0; i < length; i++) {
+                    result += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+                return result;
+            } else if (textType === 'letters') {
+                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+                let result = '';
+                for (let i = 0; i < length; i++) {
+                    result += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+                return result;
+            }
+        }
+
+        // Display preview
+        function displayPreview() {
+            const container = document.getElementById('previewTable');
+            const previewRows = Math.min(100, generatedData.length);
+            
+            let html = '<table><thead><tr>';
+            
+            html += '<th>ID</th>';
+            datasetConfig.columns.forEach(col => {
+                html += `<th>${col.name}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+            
+            for (let i = 0; i < previewRows; i++) {
+                html += '<tr>';
+                html += `<td>${generatedData[i].ID}</td>`;
+                datasetConfig.columns.forEach(col => {
+                    html += `<td>${generatedData[i][col.name]}</td>`;
+                });
+                html += '</tr>';
+            }
+            
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        // Download CSV
+        document.getElementById('downloadBtn').addEventListener('click', () => {
+            let csv = 'ID,' + datasetConfig.columns.map(col => `"${col.name}"`).join(',') + '\n';
+            
+            generatedData.forEach(row => {
+                const values = [row.ID];
+                datasetConfig.columns.forEach(col => {
+                    const value = row[col.name];
+                    values.push(`"${value}"`);
+                });
+                csv += values.join(',') + '\n';
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', `synthetic_data_${Date.now()}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+    </script>
+</body>
+</html>
